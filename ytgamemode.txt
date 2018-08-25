@@ -1,0 +1,7 @@
+"ytgamemode"
+{
+	"base"			"base"
+	"title"			"YTGamemode"
+	"maps"			""
+	"menusystem"	"1"
+}

@@ -7,8 +7,6 @@ AddCSLuaFile("custom_scoreboard.lua")
 include("shared.lua")
 include("concommands.lua")
 
-local open = false
-
 function GM:PlayerInitialSpawn(ply)
 	if (ply:GetPData("playerLvl") == nil) then
 		ply:SetNWInt("playerLvl", 1)

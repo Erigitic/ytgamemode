@@ -3,11 +3,11 @@ AddCSLuaFile("shared.lua")
 AddCSLuaFile("testhud.lua")
 AddCSLuaFile("custom_menu.lua")
 AddCSLuaFile("custom_scoreboard.lua")
+AddCSLuaFile("shop_items.lua")
 
 include("shared.lua")
 include("concommands.lua")
-
-local open = false
+include("shop_items.lua")
 
 function GM:PlayerInitialSpawn(ply)
 	if (ply:GetPData("playerLvl") == nil) then

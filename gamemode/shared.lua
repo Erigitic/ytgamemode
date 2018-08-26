@@ -3,8 +3,6 @@ GM.Author = "Erigitic"
 GM.Email = "N/A"
 GM.Website = "N/A"
 
-DeriveGamemode("sandbox")
+YTG = {}
 
-function GM:Initialize()
-	-- Do stuff
-end
+DeriveGamemode("sandbox")

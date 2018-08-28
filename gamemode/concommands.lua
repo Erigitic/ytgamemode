@@ -2,17 +2,17 @@ function buyEntity(ply, cmd, args)
 	if (args[1] != nil) then
 		local ent = ents.Create(args[1])
 		local tr = ply:GetEyeTrace()
-		local balance = ply:GetNWInt("playerMoney")
+		local balance = ply:GetBalance()
 
-		if (ent:IsValid()) then
+		if (IsValid(ent)) then
 			local ClassName = ent:GetClass()
 
 			if (!tr.Hit) then return end
 
 			local entCount = ply:GetNWInt(ClassName .. "count")
 
-			if (!IsValid(ent) or entCount < ent.Limit) then
-				if (balance >= ent.Cost) then
+			if (!ent.Limit or entCount < ent.Limit) then
+				if (ply:CanAfford(ent.Cost)) then
 					local SpawnPos = ply:GetShootPos() + ply:GetForward() * 80
 
 					ent.Owner = ply
@@ -21,7 +21,7 @@ function buyEntity(ply, cmd, args)
 					ent:Spawn()
 					ent:Activate()
 
-					ply:SetNWInt("playerMoney", balance - ent.Cost)
+					ply:RemoveFromBalance(ent.Cost)
 					ply:SetNWInt(ClassName .. "count", entCount + 1)
 
 					return ent
@@ -44,14 +44,13 @@ function buyGun(ply, cmd, args)
 
 	for k, v in pairs(weaponPrices) do
 		if (args[1] == v[1]) then
-			local balance = ply:GetNWInt("playerMoney")
-			local playerLvl = ply:GetNWInt("playerLvl")
+			local playerLvl = ply:GetLevel()
 			local gunCost = tonumber(v[2])
 			local levelReq = tonumber(v[3])
 
 			if (playerLvl >= levelReq) then
-				if (balance >= gunCost) then
-					ply:SetNWInt("playerMoney", balance - gunCost)
+				if (ply:CanAfford(gunCost)) then
+					ply:RemoveFromBalance(gunCost)
 					ply:SetNWString("playerWeapon", args[1])
 					ply:Give(args[1])
 					ply:GiveAmmo(20, ply:GetWeapon(args[1]):GetPrimaryAmmoType(), false)

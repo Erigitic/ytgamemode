@@ -23,24 +23,16 @@ end
 function ENT:SpawnFunction(ply, tr, ClassName)
 	if (!tr.Hit) then return end
 	
-	local entCount = ply:GetNWInt(ClassName .. "count")
+	local SpawnPos = ply:GetShootPos() + ply:GetForward() * 80
 	
-	if (entCount < self.Limit) then
-		local SpawnPos = ply:GetShootPos() + ply:GetForward() * 80
-		
-		self.Owner = ply
-		
-		local ent = ents.Create(ClassName)
-		ent:SetPos(SpawnPos)
-		ent:Spawn()
-		ent:Activate()
-		
-		ply:SetNWInt(ClassName .. "count", entCount + 1)
-		
-		return ent
-	end
+	self.Owner = ply
 	
-	return
+	local ent = ents.Create(ClassName)
+	ent:SetPos(SpawnPos)
+	ent:Spawn()
+	ent:Activate()
+	
+	return ent
 end
 
 function ENT:Use(activator, caller)

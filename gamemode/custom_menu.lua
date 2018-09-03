@@ -59,22 +59,21 @@ function addButtons(Menu)
 			surface.SetTextColor(255, 255, 255, 255)
 			
 			-- Player Name
-			surface.CreateFont("HeaderFont", {font="Default", size=30, weight=5000})
-			surface.SetFont("HeaderFont")
+			surface.SetFont("Trebuchet24")
 			surface.SetTextPos(5, 0)
 			surface.DrawText(LocalPlayer():GetName())
 			
 			-- Player Exp and Level
-			local expToLevel = (LocalPlayer():GetNWInt("playerLvl") * 100) * 2
+			local expToLevel = (LocalPlayer():GetLevel() * 100) * 2
 			
 			surface.SetFont("Default")
 			surface.SetTextPos(8, 35)
-			surface.DrawText("Level "..LocalPlayer():GetNWInt("playerLvl"))
-			surface.DrawText("\tExp "..LocalPlayer():GetNWInt("playerExp").."/"..expToLevel)
+			surface.DrawText("Level "..LocalPlayer():GetLevel())
+			surface.DrawText("\tExp "..LocalPlayer():GetExp().."/"..expToLevel)
 			
 			-- Balance
 			surface.SetTextPos(8, 55)
-			surface.DrawText("Balance: "..LocalPlayer():GetNWInt("playerMoney"))
+			surface.DrawText("Balance: "..LocalPlayer():GetBalance())
 		end
 	end
 	

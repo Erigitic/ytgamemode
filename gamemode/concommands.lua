@@ -2,7 +2,6 @@ function buyEntity(ply, cmd, args)
 	if (args[1] != nil) then
 		local ent = ents.Create(args[1])
 		local tr = ply:GetEyeTrace()
-		local balance = ply:GetBalance()
 
 		if (IsValid(ent)) then
 			local ClassName = ent:GetClass()

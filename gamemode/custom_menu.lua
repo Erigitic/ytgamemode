@@ -11,7 +11,7 @@ local function openF4Menu()
 
 		local shopPanel = vgui.Create("ShopPanel", menu)
 
-		menu:AddSheet("Shop Panel", shopPanel)
+		menu:AddSheet("Shop", shopPanel)
 	end
 end
 concommand.Add("open_game_menu", openF4Menu)
@@ -23,20 +23,25 @@ function PANEL:Init()
 	self:Center()
 	self:MakePopup()
 	self:SetupCloseButton(function() 
-		self:Close() 
+		self:Close() -- On click, close the panel
 	end)
 	self:ParentToHUD() -- Hides the panel when in the escape menu
 end
 
 function PANEL:SetupCloseButton(func)
+	-- Since we're basing this control off of a DPropertySheet we are able to edit something called the tabScroller.
+	-- The tabScroller is a horizontal scrollbar that allows tabs to be scrolled left and right when needed.
+	-- We can add to it in order to create a close button on the far right hand side.
+	-- The only problem, the close button will overlap tabs if there are too many of them.
+	-- This will most likely not be an issue for us.
 	self.CloseButton = self.tabScroller:Add("DButton")
-    self.CloseButton:SetText("")
-    self.CloseButton.DoClick = func
+	self.CloseButton:SetText("")
+	self.CloseButton.DoClick = func
 	self.CloseButton.Paint = function(panel, w, h)
 		derma.SkinHook("Paint", "WindowCloseButton", panel, w, h)
 	end
-    self.CloseButton:Dock(RIGHT)
-    self.CloseButton:DockMargin(0, 0, 0, 8)
+    self.CloseButton:Dock(RIGHT) -- Align it to the far right side
+    self.CloseButton:DockMargin(0, 0, 0, 8) -- Bottom margin of 8
     self.CloseButton:SetSize(32, 32)
 end
 
@@ -52,80 +57,28 @@ end
 function PANEL:Close()
 	self:Hide()
 end
-derma.DefineControl("F4PropertySheet", "", vgui.GetControlTable("DPropertySheet"), "EditablePanel")
-derma.DefineControl("F4Menu", "", PANEL, "F4PropertySheet")
-
--- Shop Panel
+-- Register our custom panel and set its base to DPropertySheet
+vgui.Register("F4Menu", PANEL, "DPropertySheet")
 
 PANEL = {} -- Create an empty panel
 
 function PANEL:Init() -- Initialize the panel
-	self:StretchToParent(0, 0, 0, 0)
-	
-	local categoryList = vgui.Create("DPanelList", self)
-	categoryList:StretchToParent(0, 0, 0, 0)
-	categoryList:SetSpacing(5)
-	categoryList:EnableHorizontal(false)
-	categoryList:EnableVerticalScrollbar(true)
+	local categoryList = vgui.Create("DCategoryList", self)
+	categoryList:Dock(FILL) -- Fill parent
 
 	local entityCategory = vgui.Create("DCollapsibleCategory", categoryList)
-	entityCategory:SetPos(0, 0)
-	entityCategory:SetSize(self:GetWide(), 50)
 	entityCategory:SetLabel("Entities")
 	
 	local weaponCategory = vgui.Create("DCollapsibleCategory", categoryList)
-	weaponCategory:SetPos(0, 50)
-	weaponCategory:SetSize(self:GetWide(), 50)
 	weaponCategory:SetLabel("Weapons")
 
-	local entityList = vgui.Create("DPanelList", entityCategory)
-	entityList:EnableVerticalScrollbar(true)
-	entityList:EnableHorizontal(true)
-	entityList:SetAutoSize(true)
-	entityList:SetSpacing(5)
-	entityList:SetPadding(5)
+	local entityList = vgui.Create("DIconLayout", entityCategory)
 	entityCategory:SetContents(entityList)
 
-	local weaponList = vgui.Create("DPanelList", weaponCategory)
-	weaponList:EnableVerticalScrollbar(true)
-	weaponList:EnableHorizontal(true)
-	weaponList:SetAutoSize(true)
-	weaponList:SetSpacing(5)
-	weaponList:SetPadding(5)
+	local weaponList = vgui.Create("DIconLayout", weaponCategory)
 	weaponCategory:SetContents(weaponList)
 
-	categoryList:AddItem(entityCategory)
-	categoryList:AddItem(weaponCategory)
-	
-	local entsArr = {}
-	entsArr[1] = scripted_ents.Get("ammo_dispenser")
-	entsArr[2] = scripted_ents.Get("barricade")
-	
-	for k, v in pairs(entsArr) do
-		local icon = vgui.Create("SpawnIcon", entityList)
-		icon:SetModel(v["Model"])
-		icon:SetToolTip(v["PrintName"].."\nCost: "..v["Cost"])
-		icon:InvalidateLayout(true)
-		entityList:AddItem(icon)
-		icon.DoClick = function(icon)
-			ply:ConCommand("buy_entity "..v["ClassName"])
-		end
-	end
-	
-	local weaponsArr = {}
-	weaponsArr[1] = {"models/weapons/w_pist_deagle.mdl", "bb_deagle", "Desert Eagle", "100", "1"}
-	
-	for k, v in pairs(weaponsArr) do
-		local icon = vgui.Create("SpawnIcon", weaponList)
-		icon:SetModel(v[1])
-		icon:SetToolTip(v[3].."\nCost: "..v[4].."\nLevel Req: "..v[5])
-		icon:InvalidateLayout(true)
-		weaponList:AddItem(icon)
-		icon.DoClick = function(icon)
-			ply:ConCommand("buy_gun "..v[2])
-		end
-	end
+	vgui.Create("SpawnIcon", entityList)
+	vgui.Create("SpawnIcon", weaponList)
 end
 vgui.Register("ShopPanel", PANEL, "DPanel")
-
--- End Shop Panel

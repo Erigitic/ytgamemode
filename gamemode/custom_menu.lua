@@ -60,9 +60,9 @@ end
 -- Register our custom panel and set its base to DPropertySheet
 vgui.Register("F4Menu", PANEL, "DPropertySheet")
 
-PANEL = {} -- Create an empty panel
+PANEL = {}
 
-function PANEL:Init() -- Initialize the panel
+function PANEL:Init()
 	local categoryList = vgui.Create("DCategoryList", self)
 	categoryList:Dock(FILL) -- Fill parent
 

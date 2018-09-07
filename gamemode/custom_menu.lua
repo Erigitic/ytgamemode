@@ -6,7 +6,6 @@ local function openF4Menu()
 
 	if IsValid(menu) then
 		menu:Show()
-		menu:InvalidateLayout()
 	else
 		menu = vgui.Create("F4Menu")
 

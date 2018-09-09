@@ -4,7 +4,7 @@ local ply
 local function openF4Menu()
 	ply = LocalPlayer()
 
-	if IsValid(menu) then
+	if (IsValid(menu)) then
 		menu:Show()
 	else
 		menu = vgui.Create("F4Menu")
@@ -63,22 +63,23 @@ vgui.Register("F4Menu", PANEL, "DPropertySheet")
 PANEL = {}
 
 function PANEL:Init()
-	local categoryList = vgui.Create("DCategoryList", self)
-	categoryList:Dock(FILL) -- Fill parent
+	self.CategoryList = vgui.Create("DCategoryList", self)
+	self.CategoryList:Dock(FILL) -- Fill parent
 
-	local entityCategory = vgui.Create("DCollapsibleCategory", categoryList)
-	entityCategory:SetLabel("Entities")
+	self.EntityCategory = vgui.Create("DCollapsibleCategory", self.CategoryList)
+	self.EntityCategory:SetLabel("Entities")
 	
-	local weaponCategory = vgui.Create("DCollapsibleCategory", categoryList)
-	weaponCategory:SetLabel("Weapons")
+	self.WeaponCategory = vgui.Create("DCollapsibleCategory", self.CategoryList)
+	self.WeaponCategory:SetLabel("Weapons")
 
-	local entityList = vgui.Create("DIconLayout", entityCategory)
-	entityCategory:SetContents(entityList)
+	self.EntityList = vgui.Create("DIconLayout", self.EntityCategory)
+	self.EntityCategory:SetContents(self.EntityList)
 
-	local weaponList = vgui.Create("DIconLayout", weaponCategory)
-	weaponCategory:SetContents(weaponList)
+	self.WeaponList = vgui.Create("DIconLayout", self.WeaponCategory)
+	self.WeaponCategory:SetContents(self.WeaponList)
 
-	vgui.Create("SpawnIcon", entityList)
-	vgui.Create("SpawnIcon", weaponList)
+	-- Placeholder icons
+	vgui.Create("SpawnIcon", self.EntityList)
+	vgui.Create("SpawnIcon", self.WeaponList)
 end
 vgui.Register("ShopPanel", PANEL, "DPanel")

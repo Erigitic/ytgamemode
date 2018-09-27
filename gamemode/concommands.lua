@@ -2,17 +2,16 @@ function buyEntity(ply, cmd, args)
 	if (args[1] != nil) then
 		local ent = ents.Create(args[1])
 		local tr = ply:GetEyeTrace()
-		local balance = ply:GetNWInt("playerMoney")
 
-		if (ent:IsValid()) then
+		if (IsValid(ent)) then
 			local ClassName = ent:GetClass()
 
 			if (!tr.Hit) then return end
 
 			local entCount = ply:GetNWInt(ClassName .. "count")
 
-			if (!IsValid(ent) or entCount < ent.Limit) then
-				if (balance >= ent.Cost) then
+			if (!ent.Limit or entCount < ent.Limit) then
+				if (ply:CanAfford(ent.Cost)) then
 					local SpawnPos = ply:GetShootPos() + ply:GetForward() * 80
 
 					ent.Owner = ply
@@ -21,7 +20,7 @@ function buyEntity(ply, cmd, args)
 					ent:Spawn()
 					ent:Activate()
 
-					ply:SetNWInt("playerMoney", balance - ent.Cost)
+					ply:RemoveFromBalance(ent.Cost)
 					ply:SetNWInt(ClassName .. "count", entCount + 1)
 
 					return ent

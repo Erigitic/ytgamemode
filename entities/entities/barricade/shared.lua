@@ -14,5 +14,5 @@ ENT.PrintName = "Barricade"
 ENT.Author = "Erigitic"
 ENT.Purpose = "Barricade off doors"
 ENT.Instructions = "Place"
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.AdminSpawnable = false

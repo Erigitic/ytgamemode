@@ -20,21 +20,6 @@ function ENT:Initialize()
 	self:SetHealth(self.BaseHealth)
 end
 
-function ENT:SpawnFunction(ply, tr, ClassName)
-	if (!tr.Hit) then return end
-	
-	local SpawnPos = ply:GetShootPos() + ply:GetForward() * 80
-	
-	self.Owner = ply
-	
-	local ent = ents.Create(ClassName)
-	ent:SetPos(SpawnPos)
-	ent:Spawn()
-	ent:Activate()
-	
-	return ent
-end
-
 function ENT:Use(activator, caller)
 	local ammoType = activator:GetActiveWeapon():GetPrimaryAmmoType() -- Get primary weapons ammo type
 	
@@ -50,17 +35,5 @@ function ENT:OnTakeDamage(damage)
 	
 	if (self:Health() <= 0) then
 		self:Remove()
-	end
-end
-
-function ENT:OnRemove()
-	local Owner = self.Owner
-	local ClassName = self:GetClass()
-	local entCount = Owner:GetNWInt(ClassName .. "count")
-	
-	if (Owner:IsValid()) then
-		if (Owner:GetNWInt(ClassName.."count") > 0) then
-			Owner:SetNWInt(ClassName .. "count", entCount - 1)
-		end
 	end
 end

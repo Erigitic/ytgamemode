@@ -1,78 +1,74 @@
-function buyEntity(ply, cmd, args)
-	if (args[1] != nil) then
-		local ent = ents.Create(args[1])
-		local tr = ply:GetEyeTrace()
+local function handleLimitChange(ent, itemName, ply)
+	ply:SetVar("amount_"..itemName, ply:GetVar("amount_"..itemName, 0) + 1)
 
-		if (IsValid(ent)) then
-			local ClassName = ent:GetClass()
-
-			if (!tr.Hit) then return end
-
-			local entCount = ply:GetNWInt(ClassName .. "count")
-
-			if (!ent.Limit or entCount < ent.Limit) then
-				if (ply:CanAfford(ent.Cost)) then
-					local SpawnPos = ply:GetShootPos() + ply:GetForward() * 80
-
-					ent.Owner = ply
-
-					ent:SetPos(SpawnPos)
-					ent:Spawn()
-					ent:Activate()
-
-					ply:RemoveFromBalance(ent.Cost)
-					ply:SetNWInt(ClassName .. "count", entCount + 1)
-
-					return ent
-				else
-					ply:PrintMessage(HUD_PRINTTALK, "You do not have enough money to purchase this item.")
-				end
-			else
-				ply:PrintMessage(HUD_PRINTTALK, "You already have the maximum amount of this entity type. MAX = "..ent.Limit)
-			end
-
-			return
-		end
-	end
+	ent:CallOnRemove("DecrementLimit", function()
+		ply:SetVar("amount_"..itemName, ply:GetVar("amount_"..itemName) - 1)
+	end)
 end
-concommand.Add("buy_entity", buyEntity)
 
--- function buyGun(ply, cmd, args)
--- 	local weaponPrices = {}
--- 	weaponPrices[1] = {"bb_deagle", "100", "13"}
+-- The underscore in the function arguments just indicates we won't be using it within the function.
+local function buyItem(ply, _, args)
+	local categoryName = args[1]
+	local itemName = args[2]
 
--- 	for k, v in pairs(weaponPrices) do
--- 		if (args[1] == v[1]) then
--- 			local balance = ply:GetNWInt("playerMoney")
--- 			local playerLvl = ply:GetNWInt("playerLvl")
--- 			local gunCost = tonumber(v[2])
--- 			local levelReq = tonumber(v[3])
+	local itemTbl = YTG.ShopItems[categoryName][itemName]
 
--- 			if (playerLvl >= levelReq) then
--- 				if (balance >= gunCost) then
--- 					ply:SetNWInt("playerMoney", balance - gunCost)
--- 					ply:SetNWString("playerWeapon", args[1])
--- 					ply:Give(args[1])
--- 					ply:GiveAmmo(20, ply:GetWeapon(args[1]):GetPrimaryAmmoType(), false)
--- 				else
--- 					ply:PrintMessage(HUD_PRINTTALK, "You do not have enough money to purchase this item.")
--- 				end
--- 			else
--- 				ply:PrintMessage(HUD_PRINTTALK, "You must be level "..levelReq.." to purchase this item.")
--- 			end
+	local isGun = itemTbl.IsGun or false
+	local price = itemTbl.Price
+	local lvlReq = itemTbl.LvlReq
+	local limit = itemTbl.Limit
+	local model = itemTbl.Model
+	local className = itemTbl.ClassName
 
--- 			return
--- 		end
--- 	end
--- end
-function buyGun(ply, cmd, args)
-	if not args[1] then
+	if not ply:CanAfford(price) then
+		ply:ChatPrint("You can't afford this item.")
 		return
 	end
-end
-concommand.Add("buy_gun", buyGun)
 
-function upgradePrintAmount(ply, cmd, args)
-	Entity(args[1]):SetPrintAmount(100)
+	if ply:GetLevel() < lvlReq then
+		ply:ChatPrint("You must be level "..lvlReq.." to purchase this item.")
+		return
+	end
+
+	if (isGun) then
+		ply:Give(className)
+		ply:GiveAmmo(20, ply:GetWeapon(className):GetPrimaryAmmoType(), false)
+	else -- Scripted entity
+		if limit then
+			local plyCurSpawnAmount = ply:GetVar("amount_"..itemName, 0) -- We don't need this value clientside, so just grab it from the player table, default to 0 if doesn't exist
+	
+			if plyCurSpawnAmount >= limit then
+				ply:ChatPrint("You've reached the spawn limit for this item.")
+				return
+			end
+		end
+
+		local tr = {}
+		tr.start = ply:EyePos()
+		tr.endpos = tr.start + ply:GetAimVector() * 85 -- Only allow the trace to travel 85 units forward
+		tr.filter = ply -- Filter out the player so the trace doesn't hit them
+
+		-- Perform the trace with the trace data created above. Returns the result of the trace.
+		tr = util.TraceLine(tr)
+
+		local SpawnPos = tr.HitPos + Vector(0, 0, 40)
+		local SpawnAng = ply:EyeAngles()
+		SpawnAng.pitch = 0 -- Set pitch to 0
+		SpawnAng.yaw = SpawnAng.y + 180 -- Increment yaw by 180. In simpler terms, rotate 180 degrees around the vertical axis. This makes the entity face the player.
+
+		local ent = ents.Create(className)
+		ent.Owner = ply
+		ent:SetModel(model)
+		ent:SetPos(SpawnPos)
+		ent:SetAngles(SpawnAng)
+		ent:Spawn()
+		ent:Activate()
+
+		if limit then
+			handleLimitChange(ent, itemName, ply)
+		end
+	end
+
+	ply:RemoveFromBalance(price)
 end
-concommand.Add("upgrade_print_amount", upgradePrintAmount)
+concommand.Add("buy_item", buyItem)

@@ -63,23 +63,34 @@ vgui.Register("F4Menu", PANEL, "DPropertySheet")
 PANEL = {}
 
 function PANEL:Init()
-	self.CategoryList = vgui.Create("DCategoryList", self)
-	self.CategoryList:Dock(FILL) -- Fill parent
+	local categoryList = vgui.Create("DCategoryList", self)
+	categoryList:Dock(FILL) -- Fill parent
 
-	self.EntityCategory = vgui.Create("DCollapsibleCategory", self.CategoryList)
-	self.EntityCategory:SetLabel("Entities")
-	
-	self.WeaponCategory = vgui.Create("DCollapsibleCategory", self.CategoryList)
-	self.WeaponCategory:SetLabel("Weapons")
+	-- Loop through each category in alphabetical order
+	for categoryName, categoryTbl in SortedPairs(YTG.ShopItems) do
+		local collapsibleCategory = vgui.Create("DCollapsibleCategory", categoryList)
+		collapsibleCategory:SetLabel(categoryName)
 
-	self.EntityList = vgui.Create("DIconLayout", self.EntityCategory)
-	self.EntityCategory:SetContents(self.EntityList)
+		local iconLayout = vgui.Create("DIconLayout", collapsibleCategory)
+		collapsibleCategory:SetContents(iconLayout)
 
-	self.WeaponList = vgui.Create("DIconLayout", self.WeaponCategory)
-	self.WeaponCategory:SetContents(self.WeaponList)
+		-- Loop through each item, sorted by price from high to low, in the current category table
+		for itemName, itemTbl in SortedPairsByMemberValue(categoryTbl, "Price") do
+			local model = itemTbl.Model
+			local price = itemTbl.Price
+			local lvlReq = itemTbl.LvlReq
 
-	-- Placeholder icons
-	vgui.Create("SpawnIcon", self.EntityList)
-	vgui.Create("SpawnIcon", self.WeaponList)
+			local icon = vgui.Create("SpawnIcon", iconLayout)
+			icon:SetModel(model)
+			icon:SetToolTip(
+				itemName..
+				"\nPrice: "..price..
+				"\nLevel: "..lvlReq
+			)
+			icon.DoClick = function()
+				RunConsoleCommand("buy_item", categoryName, itemName)
+			end
+		end
+	end
 end
 vgui.Register("ShopPanel", PANEL, "DPanel")

@@ -20,21 +20,6 @@ function ENT:Initialize()
 	self:SetHealth(self.BaseHealth)
 end
 
-function ENT:SpawnFunction(ply, tr, ClassName)
-	if (!tr.Hit) then return end
-
-	local SpawnPos = ply:GetShootPos() + ply:GetForward() * 80
-
-	self.Owner = ply
-
-	local ent = ents.Create(ClassName)
-	ent:SetPos(SpawnPos)
-	ent:Spawn()
-	ent:Activate()
-
-	return ent
-end
-
 util.AddNetworkString("OpenBarricadeMenu")
 function ENT:Use(activator, caller)
 	if (caller == self.Owner) then
